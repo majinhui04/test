@@ -13,6 +13,7 @@
  *	'Page $1');
  *
  * Hash.go('/page/1');
+ * fuck
  **/
 
 (function() {
