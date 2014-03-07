@@ -1,0 +1,285 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>完整demo</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <script type="text/javascript">
+/**
+ *  ueditor完整配置项
+ *  可以在这里配置整个编辑器的特性
+ */
+(function () {
+   
+    var URL = window.UEDITOR_HOME_URL || getUEBasePath();
+
+    window.UEDITOR_CONFIG = {
+
+        //为编辑器实例添加一个路径，这个不能被注释
+        UEDITOR_HOME_URL : URL
+        //工具栏上的所有的功能按钮和下拉框，可以在new编辑器的实例时选择自己需要的从新定义
+        , toolbars:[
+            ['fullscreen', 'source', '|', 'undo', 'redo', '|',
+                 'removeformat',  'pasteplain', '|', 'forecolor', '|',
+                 'fontfamily', 'fontsize', '|',
+                 'pagebreak']
+        ]
+        ,autoHeightEnabled:false
+        ,elementPathEnabled:false
+        ,zIndex:900
+        ,initialFrameWidth:1000  //初始化编辑器宽度,默认1000
+        ,initialFrameHeight:320  //初始化编辑器高度,默认320
+        ,zIndex : 900     //编辑器层级的基数,默认是900
+        ,wordCount:true          //是否开启字数统计
+        ,maximumWords:10000       //允许的最大字符数
+        //字数统计提示，{#count}代表当前字数，{#leave}代表还可以输入多少字符数,留空支持多语言自动切换，否则按此配置显示
+        //,wordCountMsg:''   //当前已输入 {#count} 个字符，您还可以输入{#leave} 个字符
+        //超出字数限制提示  留空支持多语言自动切换，否则按此配置显示
+        //,wordOverFlowMsg:''    //<span style="color:red;">你输入的字符个数已经超出最大允许值，服务器可能会拒绝保存！</span>
+        
+        //pageBreakTag
+        //分页标识符,默认是_ueditor_page_break_tag_
+        ,pageBreakTag:'_page_break_tag_'
+
+
+    };
+
+    function getUEBasePath ( docUrl, confUrl ) {
+
+        return getBasePath( docUrl || self.document.URL || self.location.href, confUrl || getConfigFilePath() );
+
+    }
+
+    function getConfigFilePath () {
+
+        var configPath = document.getElementsByTagName('script');
+
+        return configPath[ configPath.length -1 ].src;
+
+    }
+
+    function getBasePath ( docUrl, confUrl ) {
+
+        var basePath = confUrl;
+
+
+        if(/^(\/|\\\\)/.test(confUrl)){
+
+            basePath = /^.+?\w(\/|\\\\)/.exec(docUrl)[0] + confUrl.replace(/^(\/|\\\\)/,'');
+
+        }else if ( !/^[a-z]+:/i.test( confUrl ) ) {
+
+            docUrl = docUrl.split( "#" )[0].split( "?" )[0].replace( /[^\\\/]+$/, '' );
+
+            basePath = docUrl + "" + confUrl;
+
+        }
+
+        return optimizationPath( basePath );
+
+    }
+
+    function optimizationPath ( path ) {
+
+        var protocol = /^[a-z]+:\/\//.exec( path )[ 0 ],
+            tmp = null,
+            res = [];
+
+        path = path.replace( protocol, "" ).split( "?" )[0].split( "#" )[0];
+
+        path = path.replace( /\\/g, '/').split( /\// );
+
+        path[ path.length - 1 ] = "";
+
+        while ( path.length ) {
+
+            if ( ( tmp = path.shift() ) === ".." ) {
+                res.pop();
+            } else if ( tmp !== "." ) {
+                res.push( tmp );
+            }
+
+        }
+
+        return protocol + res.join( "/" );
+
+    }
+
+    window.UE = {
+        getUEBasePath: getUEBasePath
+    };
+
+})();
+
+
+    </script>
+    <script type="text/javascript" charset="utf-8" src="ueditor.all.min.js"> </script>
+    <!--建议手动加在语言，避免在ie下有时因为加载语言失败导致编辑器加载失败-->
+
+    <style type="text/css">
+        .clear {
+            clear: both;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <h1>完整demo</h1>
+    <script id="editor" type="text/plain" style="width:1024px;height:500px;"><p>sdsdadadas<p>2</script>
+</div>
+<div id="btns">
+    <div>
+        <button onclick="getAllHtml()">获得整个html的内容</button>
+        <button onclick="getContent()">获得内容</button>
+        <button onclick="setContent()">写入内容</button>
+        <button onclick="setContent(true)">追加内容</button>
+        <button onclick="getContentTxt()">获得纯文本</button>
+        <button onclick="getPlainTxt()">获得带格式的纯文本</button>
+        <button onclick="hasContent()">判断是否有内容</button>
+        <button onclick="setFocus()">使编辑器获得焦点</button>
+        <button onmousedown="isFocus(event)">编辑器是否获得焦点</button>
+        <button onmousedown="setblur(event)" >编辑器失去焦点</button>
+
+    </div>
+    <div>
+        <button onclick="getText()">获得当前选中的文本</button>
+        <button onclick="insertHtml()">插入给定的内容</button>
+        <button id="enable" onclick="setEnabled()">可以编辑</button>
+        <button onclick="setDisabled()">不可编辑</button>
+        <button onclick=" UE.getEditor('editor').setHide()">隐藏编辑器</button>
+        <button onclick=" UE.getEditor('editor').setShow()">显示编辑器</button>
+        <button onclick=" UE.getEditor('editor').setHeight(300)">设置编辑器的高度为300</button>
+    </div>
+
+    <div>
+        <button onclick="getLocalData()" >获取草稿箱内容</button>
+        <button onclick="clearLocalData()" >清空草稿箱</button>
+    </div>
+
+</div>
+<div>
+    <button onclick="createEditor()"/>
+    创建编辑器</button>
+    <button onclick="deleteEditor()"/>
+    删除编辑器</button>
+</div>
+
+</body>
+<script type="text/javascript">
+
+    //实例化编辑器
+    //建议使用工厂方法getEditor创建和引用编辑器实例，如果在某个闭包下引用该编辑器，直接调用UE.getEditor('editor')就能拿到相关的实例
+    UE.getEditor('editor',{
+        initialFrameWidth:300,
+        initialFrameHeight:200,
+        maximumWords:20
+    });
+
+
+    function isFocus(e){
+        alert(UE.getEditor('editor').isFocus());
+        UE.dom.domUtils.preventDefault(e)
+    }
+    function setblur(e){
+        UE.getEditor('editor').blur();
+        UE.dom.domUtils.preventDefault(e)
+    }
+    function insertHtml() {
+        var value = prompt('插入html代码', '');
+        UE.getEditor('editor').execCommand('insertHtml', value)
+    }
+    function createEditor() {
+        enableBtn();
+        UE.getEditor('editor');
+    }
+    function getAllHtml() {
+        alert(UE.getEditor('editor').getAllHtml())
+    }
+    function getContent() {
+        var arr = [];
+        arr.push("使用editor.getContent()方法可以获得编辑器的内容");
+        arr.push("内容为：");
+        arr.push(UE.getEditor('editor').getContent());
+        alert(arr.join("\n"));
+    }
+    function getPlainTxt() {
+        var arr = [];
+        arr.push("使用editor.getPlainTxt()方法可以获得编辑器的带格式的纯文本内容");
+        arr.push("内容为：");
+        arr.push(UE.getEditor('editor').getPlainTxt());
+        alert(arr.join('\n'))
+    }
+    function setContent(isAppendTo) {
+        var arr = [];
+        arr.push("使用editor.setContent('欢迎使用ueditor')方法可以设置编辑器的内容");
+        UE.getEditor('editor').setContent('欢迎使用ueditor', isAppendTo);
+        alert(arr.join("\n"));
+    }
+    function setDisabled() {
+        UE.getEditor('editor').setDisabled('fullscreen');
+        disableBtn("enable");
+    }
+
+    function setEnabled() {
+        UE.getEditor('editor').setEnabled();
+        enableBtn();
+    }
+
+    function getText() {
+        //当你点击按钮时编辑区域已经失去了焦点，如果直接用getText将不会得到内容，所以要在选回来，然后取得内容
+        var range = UE.getEditor('editor').selection.getRange();
+        range.select();
+        var txt = UE.getEditor('editor').selection.getText();
+        alert(txt)
+    }
+
+    function getContentTxt() {
+        var arr = [];
+        arr.push("使用editor.getContentTxt()方法可以获得编辑器的纯文本内容");
+        arr.push("编辑器的纯文本内容为：");
+        arr.push(UE.getEditor('editor').getContentTxt());
+        alert(arr.join("\n"));
+    }
+    function hasContent() {
+        var arr = [];
+        arr.push("使用editor.hasContents()方法判断编辑器里是否有内容");
+        arr.push("判断结果为：");
+        arr.push(UE.getEditor('editor').hasContents());
+        alert(arr.join("\n"));
+    }
+    function setFocus() {
+        UE.getEditor('editor').focus();
+    }
+    function deleteEditor() {
+        disableBtn();
+        UE.getEditor('editor').destroy();
+    }
+    function disableBtn(str) {
+        var div = document.getElementById('btns');
+        var btns = domUtils.getElementsByTagName(div, "button");
+        for (var i = 0, btn; btn = btns[i++];) {
+            if (btn.id == str) {
+                domUtils.removeAttributes(btn, ["disabled"]);
+            } else {
+                btn.setAttribute("disabled", "true");
+            }
+        }
+    }
+    function enableBtn() {
+        var div = document.getElementById('btns');
+        var btns = domUtils.getElementsByTagName(div, "button");
+        for (var i = 0, btn; btn = btns[i++];) {
+            domUtils.removeAttributes(btn, ["disabled"]);
+        }
+    }
+
+    function getLocalData () {
+        alert(UE.getEditor('editor').execCommand( "getlocaldata" ));
+    }
+
+    function clearLocalData () {
+        UE.getEditor('editor').execCommand( "clearlocaldata" );
+        alert("已清空草稿箱")
+    }
+
+</script>
+</html>

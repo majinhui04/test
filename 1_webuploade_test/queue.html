@@ -1,0 +1,682 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <title>WebUploader queue上传演示</title>
+    <link rel="stylesheet" type="text/css" href="./webuploader.css" />
+    
+    <style type="text/css">
+    /*demo样式*/
+    #picker {
+        display: inline-block;
+        line-height: 1.4;
+        vertical-align: middle;
+        margin: 0 12px 0 0;
+    }
+    #picker .webuploader-pick {
+        padding: 6px 12px;
+        display: block;
+    }
+
+    /*....................*/
+    .webuploader-dialog .clearfix:after{content: "xxoo";height: 0;display: block;overflow: hidden;visibility: hidden;clear: both;}
+    .webuploader-dialog{
+        font:12px/1.5 tahoma,arial;
+        position: fixed;
+        z-index: 99;
+        right: 30px;
+        bottom: -500px;
+        background: #fff;
+        width: 560px;
+        -webkit-box-shadow: 0 0 20px -2px rgba(0,0,0,0.5);
+        -moz-box-shadow: 0 0 20px -2px rgba(0,0,0,0.5);
+        -ms-box-shadow: 0 0 20px -2px rgba(0,0,0,0.5);
+        box-shadow: 0 0 20px -2px rgba(0,0,0,0.5);
+        border: 1px solid #6d7a89;
+    }
+    .webuploader-dialog ul,.webuploader-dialog li{
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .webuploader-dialog .dialog-header{
+        position: relative;
+        height: 40px;
+        background-color: #4291EB;
+    }
+    .webuploader-dialog .dialog-btn-icon{
+        width: 15px;
+        height: 15px;
+        line-height: 15px;
+        font-size: 0;
+        cursor: pointer;
+        background: url(images/sprite_n1.gif) no-repeat;
+        display: block;
+    }
+    .webuploader-dialog .dialog-minimum-btn{
+        position: absolute;
+        right: 10px;
+        top: 12px;
+        z-index: 3;
+    }
+    .webuploader-dialog .dialog-close-btn{
+        position: absolute;
+        right: 40px;
+        top: 12px;
+        z-index: 3;
+    }
+    .webuploader-dialog .dialog-minimum-btn .dialog-btn-icon{
+        background-position: 0 -177px;
+    }
+    .webuploader-dialog .dialog-close-btn .dialog-btn-icon{
+        background-position: 0 -162px;
+    }
+    .webuploader-dialog .dialog-header-title{
+        margin: 0;
+        font-size: 14px;
+        text-indent: 1em;
+        color: #fff;
+        line-height: 40px;
+    }
+    .webuploader-dialog .queue-process{
+        padding-left: 5px;
+    }
+    .webuploader-dialog .dialog-body{
+       
+    }
+    .webuploader-dialog .queue-list{
+        position: relative;
+        height: 240px;
+        overflow: auto;
+    }
+    .webuploader-dialog .queue-item {
+        width: 100%;
+        position: relative;
+        cursor: default;
+        height: 35px;
+        line-height: 35px;
+        border-bottom: 1px solid #d2d2d2;
+        overflow: hidden;
+        font-size: 12px;
+        zoom: 1;
+        min-height: 1px;
+        *float: left;
+        clear: both;
+    }
+    .webuploader-dialog .inline-mask {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 0;
+        background: #abd7fb;
+        width: 0;
+        height: 100%;
+        background: #f5f7ff -webkit-gradient(linear,left top,left bottom,color-stop(0,rgba(153,209,255,.8)),color-stop(.5,rgba(132,199,255,.8)),color-stop(1,rgba(108,188,255,.8)));
+        background: #f5f7ff -moz-linear-gradient(top,rgba(153,209,255,.8),rgba(132,199,255,.8) 50%,rgba(108,188,255,.8));
+    }
+    .webuploader-dialog .queue-item-cell{
+        position: relative;
+        z-index: 2;
+        float: left;
+    }
+    .webuploader-dialog .queue-item-filename{
+        text-indent: 15px;
+        width: 40%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .webuploader-dialog .queue-item-size{
+        width: 13%;
+    }
+    .webuploader-dialog .queue-item-target{
+        width: 13%;
+    }
+    .webuploader-dialog .queue-item-status{
+        width: 24%;
+    }
+    .webuploader-dialog .queue-item-actions{
+        width: 10%;
+        *width:8%;
+    }
+    .webuploader-dialog .file-icon{
+        display: inline-block;
+        width: 26px;
+        height: 22px;
+        vertical-align: middle;
+        background: url(images/sprite_list_icon.gif) no-repeat 0 0 ;
+    }
+    .webuploader-dialog .filetype-video .file-icon{
+        background-position: -224px -80px;
+    }
+    .webuploader-dialog .filetype-image .file-icon{
+        background-position: 0px -80px;
+    }
+    .webuploader-dialog .item-status{
+        color:#06C;
+    }
+    .webuploader-dialog .upload-success .item-status{
+        color:#5cb85c;
+    }
+    .webuploader-dialog .upload-fail .item-status{
+        color:red;
+    }
+    .webuploader-dialog .upload-success .upload-cancel-action{
+        display: none;
+    }
+    .webuploader-dialog .upload-canceled .item-status{
+        color: #999;
+    }
+    .webuploader-dialog .upload-canceled .upload-cancel-action,
+    .webuploader-dialog .upload-fail .upload-cancel-action{
+        display: none;
+    }
+    .webuploader-dialog .upload-cancel-action{
+        color:#06C;
+        text-decoration: none;
+    }
+    </style>
+</head>
+<body>
+    <h1>queue上传演示</h1>
+    <!--dom结构部分-->
+    <div id="uploader-demo">
+        <!--用来存放item-->
+        <div id="filePicker">选择文件</div>
+        <div id="uploadBtn">开始上传</div>
+    </div>
+
+    <!-- <div class="webuploader-dialog" id="webuploaderDialog" style="bottom:0;">
+        <div class="dialog-header">
+            <h4 class="dialog-header-title">
+                <strong class="queue-status">正在上传</strong>
+                <strong class="queue-process">1/9</strong>
+            </h4>
+            <a class="dialog-minimum-btn" href="javascript:" title="最小化">
+                <span class="dialog-btn-icon"></span>
+            </a>
+            <a class="dialog-close-btn" href="javascript:" title="关闭">
+                <span class="dialog-btn-icon"></span>
+            </a>
+        </div>
+        <div class="dialog-body">
+            <ul class="queue-list">
+                <li class="clearfix queue-item">
+                    <div class="inline-mask" style="width: 100%;"></div>
+                    <div class="queue-item-cell queue-item-filename">
+                        <span class="file-icon"></span>
+                        <span class="filename">Attachment.pdf</span>
+                    </div>
+                    <div class="queue-item-cell queue-item-size">
+                        1024B
+                    </div>
+                    <div class="queue-item-cell queue-item-target">
+                        我的相册
+                    </div>
+                    <div class="queue-item-cell queue-item-status">
+                        <span class="item-status">正在上传</span>
+                    </div>
+                    <div class="queue-item-cell queue-item-actions">
+                        <a class="upload-cancel-action" href="javascript:;">取消</a>
+                    </div>
+                </li>
+                <li class="clearfix queue-item">
+                    <div class="inline-mask" style="width: 10px;"></div>
+                    <div class="queue-item-cell queue-item-filename">
+                        <span class="file-icon"></span>
+                        <span class="filename">dssdsdsd.pdf</span>
+                    </div>
+                    <div class="queue-item-cell queue-item-size">
+                        1024B
+                    </div>
+                    <div class="queue-item-cell queue-item-target">
+                        我的相册
+                    </div>
+                    <div class="queue-item-cell queue-item-status">
+                        <span class="item-status">正在上传</span>
+                    </div>
+                    <div class="queue-item-cell queue-item-actions">
+                        <a class="upload-cancel-action" href="javascript:;">取消</a>
+                    </div>
+                </li>
+                <li class="clearfix queue-item upload-done">
+                    <div class="inline-mask" style="width: 10px;"></div>
+                    <div class="queue-item-cell queue-item-filename">
+                        <span class="file-icon"></span>
+                        <span class="filename">dssdsdsd.pdf</span>
+                    </div>
+                    <div class="queue-item-cell queue-item-size">
+                        1024B
+                    </div>
+                    <div class="queue-item-cell queue-item-target">
+                        我的相册
+                    </div>
+                    <div class="queue-item-cell queue-item-status">
+                        <span class="item-status">完成</span>
+                        <span class="item-progress"></span>
+                    </div>
+                    <div class="queue-item-cell queue-item-actions">
+                        <a class="upload-cancel-action" href="javascript:;">取消</a>
+                    </div>
+                </li>
+                <li class="clearfix queue-item upload-fail">
+                    <div class="inline-mask" ></div>
+                    <div class="queue-item-cell queue-item-filename">
+                        <span class="file-icon"></span>
+                        <span class="filename">dssdsdsd.pdf</span>
+                    </div>
+                    <div class="queue-item-cell queue-item-size">
+                        1024B
+                    </div>
+                    <div class="queue-item-cell queue-item-target">
+                        我的相册
+                    </div>
+                    <div class="queue-item-cell queue-item-status">
+                        <span class="item-status">失败</span>
+                    </div>
+                    <div class="queue-item-cell queue-item-actions">
+                        <a class="upload-cancel-action" href="javascript:;">取消</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div> -->
+     
+    <script type="text/javascript" src="./jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="./webuploader.js"></script>
+    <script type="text/javascript">
+
+    function formatSize(size,len,units){
+        var unit,units = units || ['B','KB','M','G','T'],ret,len = len || 2,size = size || 0;
+
+        while( (unit = units.shift() ) && size>1024 ){
+            size = size/1024;
+        }
+        ret = size.toFixed(len)+unit;
+
+        return ret;
+    }
+    function FileProgress(file,webUploader) {
+        var $li = $('#'+file.id);
+        this.fileProgressID = file.id;
+        this.file = file;
+        this.webUploader = webUploader;
+
+        if( !$li.length ){
+            this.create();
+        }else{
+
+        }
+    }
+    FileProgress.prototype =  {
+        constructor:FileProgress,
+        create:function(){
+            var self = this,
+                file = this.file,
+                $list = $('#webuploaderDialog').find('.queue-list'),
+                $li = $('<div class="clearfix queue-item" id="'+file.id+'"></div>'),
+                $mask = $('<div class="inline-mask" ></div>'),
+                $filename = $('<div class="queue-item-cell queue-item-filename"> <span class="file-icon"></span> <span class="filename">'+file.name+'</span> </div>'),
+                $size = $('<div class="queue-item-cell queue-item-size">'+formatSize(file.size)+'</div>'),
+                $target = $('<div class="queue-item-cell queue-item-target"></div>'),
+                $status = $('<div class="queue-item-cell queue-item-status"><span class="item-status"></span><span class="item-progress"></span></div>'),
+                $actions = $('<div class="queue-item-cell queue-item-actions"><a class="upload-cancel-action" href="javascript:;">取消</a></div>');
+
+            if(file.target){
+                $target.html(file.target);
+            }
+            //type @todo
+            //
+            $li.appendTo($list);
+            $mask.appendTo($li);
+            $filename.appendTo($li);
+            $size.appendTo($li);
+            $target.appendTo($li);
+            $status.appendTo($li);
+            $actions.appendTo($li);
+
+            $('#'+file.id).find('.upload-cancel-action').on('click',function(){
+                self.setCancelled();
+            });
+            var type = file.type || '';
+            if( type && type.split('/').length ){
+                type = type.split('/')[0];
+            }
+            switch(type){
+                case 'image':
+                    $('#'+file.id).find('.queue-item-filename').addClass('filetype-image');
+                    break;
+                case 'video':
+                    $('#'+file.id).find('.queue-item-filename').addClass('filetype-video');
+                    break;
+            }
+
+
+        },
+        reset:function(){
+            var file = this.file;
+        },
+        setProgress:function(percentage){
+            var file = this.file,id = file.id,$item = $('#'+ id),$mask = $item.find('.inline-mask'),$progress = $item.find('.item-progress');
+
+            console.log('percentage',percentage);
+            $progress.text(percentage);
+            $mask.css('width',percentage);
+        },
+        setComplete:function(){
+            var file = this.file,id = file.id,$item = $('#'+ id),$status = $item.find('.item-status'),$mask = $item.find('.inline-mask');
+
+            $mask.hide();
+            $item.addClass('upload-success');
+            $status.html('上传成功');
+        },
+        setSuccess:function(){
+            var file = this.file,id = file.id,$item = $('#'+ id),$status = $item.find('.item-status'),$mask = $item.find('.inline-mask');
+
+            $mask.hide();
+            $item.addClass('upload-success');
+            $status.html('正在保存');
+        },
+        setError:function(){
+            var file = this.file,id = file.id,$item = $('#'+ id),$status = $item.find('.item-status'),$mask = $item.find('.inline-mask');
+
+            $mask.hide();
+            $item.addClass('upload-fail');
+            $status.text('失败');
+        },
+        setCancelled:function(){
+            var file = this.file,id = file.id,$item = $('#'+ id),$status = $item.find('.item-status');
+
+            
+            $item.addClass('upload-canceled');
+            $status.html('已取消');
+            this.webUploader && this.webUploader.removeFile(id);
+        },
+        setStatus:function(status){
+            var file = this.file,id = file.id,$item = $('#'+ id),$status = $item.find('.item-status'),$mask = $item.find('.inline-mask'),$progress = $item.find('.item-progress');
+
+            
+            
+            switch ( status ) {
+                case 'pedding':
+
+                    break;
+
+                case 'ready':
+                    $status.text('准备上传');
+                    break;
+
+                case 'uploading':
+                    var text = $status.text();
+                    if(text!=''){
+                        $status.text('');
+                    }
+                    
+                    break;
+                case 'success':
+                    $item.addClass('upload-success');
+                    $status.text('正在保存');
+                    $progress.text('');
+                    $mask.hide();
+                    break;
+                case 'fail':
+                    $item.addClass('upload-fail');
+                    $status.text('失败');
+                    $progress.text('');
+                    $mask.hide();
+                    break;
+                case 'completed':
+                    
+                    $status.text('上传成功');
+                    $progress.text('');
+                    break;
+                case 'paused':
+                    
+                    break;
+
+                case 'confirm':
+                    
+                    break;
+            }
+
+        },
+        toggleCancel:function(){
+
+        },
+        appear:function(){
+
+        },
+        disappear:function(){
+
+        }
+
+    };
+    var dialogTpl = '<div class="webuploader-dialog" id="webuploaderDialog">'+
+                        '<div class="dialog-header">'+
+                            '<h4 class="dialog-header-title">'+
+                                '<strong class="queue-status"></strong>'+
+                                '<strong class="queue-process"></strong>'+
+                            '</h4>'+
+                            '<a class="dialog-minimum-btn" href="javascript:" title="最小化">'+
+                                '<span class="dialog-btn-icon"></span>'+
+                            '</a>'+
+                            '<a class="dialog-close-btn" href="javascript:" title="关闭">'+
+                                '<span class="dialog-btn-icon"></span>'+
+                            '</a>'+
+                        '</div>'+
+                        '<div class="dialog-body">'+
+                            '<ul class="queue-list"></ul>'+
+                        '</div>'+
+                    '</div>';
+
+   
+    var QueueProgress = {
+        state : {},
+        clear:function(){
+            var $dialog = $('#webuploaderDialog');
+
+            $dialog.find('.queue-status').html('');
+            $dialog.find('.queue-status').html('');
+            $dialog.find('.queue-list').html('');
+        },
+        close:function(){
+
+        },
+        create:function(){
+            var self = this,$dialog = $('#webuploaderDialog');
+
+            if( !$dialog.length ){
+                $dialog = $(dialogTpl).appendTo($('body'));
+                $('#webuploaderDialog').find('.dialog-minimum-btn').on('click',function(){
+                    self.hide();
+                });
+                $('#webuploaderDialog').find('.dialog-maximize-btn').on('click',function(){
+                    self.show();
+                });
+                $('#webuploaderDialog').find('.dialog-close-btn').on('click',function(){
+                    self.close();
+                });
+            }
+            if( parseInt($('#webuploaderDialog').css('bottom'))<0 ){
+                this.show();
+            }
+        },
+        init:function(){
+            this.state = {
+                total:0,
+                success:0,
+                fail:0,
+                completed:0
+            };
+
+
+        },
+        setComplete:function(){
+            this.setStatus('finish');
+        },
+        setProgress:function(completed,total){
+            var completed = completed || 0,total = this.state.total || 0,ret = completed+'/'+total;
+
+            $('#webuploaderDialog').find('.queue-process').html(ret);
+            if(completed === total){
+                this.setStatus('finish');
+            }
+        },
+        //ready uploading finish 
+        setStatus:function(status){
+
+            switch ( status ) {
+                case 'pedding':
+
+                    break;
+
+                case 'ready':
+                    $('#webuploaderDialog').find('.queue-status').html('准备上传');
+                    break;
+
+                case 'uploading':
+                    $('#webuploaderDialog').find('.queue-status').html('正在上传');
+                    break;
+
+                case 'paused':
+                    
+                    break;
+
+                case 'confirm':
+                    
+                    break;
+                case 'finish':
+                    $('#webuploaderDialog').find('.queue-status').html('上传成功');
+                    break;
+            }
+
+
+        },
+        show:function(){
+            $('#webuploaderDialog').animate({bottom:0},500);
+        },
+        hide:function(){
+            var self = this;
+            setTimeout(function(){
+                $('#webuploaderDialog').animate({bottom:'-500px'},500,function(){
+                    self.clear();
+                });
+            },2000);
+                
+        }
+    };
+   
+    
+   
+    var uploader = queueUpload({});
+    uploader.on('uploadComplete' , function(){
+        console.warn('uploadComplete 123')
+    });
+    uploader.on('queueUploadComplete' , function(a){
+        console.warn('uploadComplete 456',a)
+    });
+    function queueUpload(options){
+        var options = options || {};
+        var defs = {
+            // 选完文件后，是否自动上传。
+            auto: false,
+            // swf文件路径
+            swf:'./Uploader.swf',
+            chunked:false,
+            chunkSize:5242880,//5M
+            // 文件接收服务端。
+            server: 'fileupload.php',
+            // 选择文件的按钮。可选。
+            // 内部根据当前运行是创建，可能是input元素，也可能是flash.
+            pick: '#filePicker',
+
+            // 不压缩image, 默认如果是jpeg，文件上传前会压缩一把再上传！
+            //resize: false,
+            // 只允许选择图片文件。
+            /*accept: {
+                title: 'Images',
+                extensions: 'gif,jpg,jpeg,bmp,png',
+                mimeTypes: 'image/*'
+            },*/
+            fileNumLimit: 300,
+            fileSizeLimit: 500 * 1024 * 1024,    // 200 M
+            fileSingleSizeLimit:  1024*1024*500    // 50 M
+        };
+        var opts = $.extend({},defs,options);
+        var uploader = WebUploader.create(opts);
+        var $list = $('#fileList'),thumbnailWidth = thumbnailHeight = 100;
+        $('#uploadBtn').on('click',function(){
+            QueueProgress.setStatus('uploading');
+            uploader.upload();
+        })
+
+        uploader.on('ready', function(){
+           console.log('ready')
+            
+        });
+        uploader.on('filesQueued', function(){
+            var state = uploader.getStats(),queueNum = state.queueNum,successNum = state.successNum;
+
+            console.log(123,state);
+            QueueProgress.setStatus('ready');
+            QueueProgress.state.total = queueNum;
+            QueueProgress.setProgress(0);
+            
+        });
+        // 当有文件添加进来的时候
+        uploader.on( 'fileQueued', function( file ) {
+            console.log(file);
+            QueueProgress.create();
+            var fileProgress = new FileProgress(file,uploader);
+            fileProgress.setStatus('ready');
+        });
+        // 文件上传过程中创建进度条实时显示。
+        uploader.on( 'uploadProgress', function( file, percentage ) {
+            var fileProgress = new FileProgress(file),percentage = percentage || 0;
+            //console.log(percentage.toFixed(2),Math.floor( percentage.toFixed(2) ))
+            percentage = percentage.toFixed(2) ;
+            fileProgress.setStatus('uploading');
+            fileProgress.setProgress(Math.floor( percentage*100)+'%');
+        });
+
+        // 文件上传成功，给item添加成功class, 用样式标记上传成功。
+        uploader.on( 'uploadSuccess', function( file ,serverData) {
+            var fileProgress = new FileProgress(file);
+            console.log('uploadSuccess',file.name,serverData);
+            fileProgress.setProgress('100%');
+            fileProgress.setStatus('success');
+        });
+        uploader.on('uploadAccept', function(object ,ret){
+            console.log('uploadAccept',object ,ret);
+            return false;
+        });
+        // 文件上传失败，显示上传出错。
+        uploader.on( 'uploadError', function( file,reason) {
+            var fileProgress = new FileProgress(file);
+            console.warn('uploadError',reason);
+            fileProgress.setStatus('fail');
+        });
+
+        // 完成上传完了，成功或者失败，先删除进度条。
+        uploader.on( 'uploadComplete', function( file,serverData ) {
+            var state = uploader.getStats(),queueNum = state.queueNum,successNum = state.successNum;
+            var fileProgress = new FileProgress(file);
+            var total = QueueProgress.state.total;
+            console.log('uploadComplete',file.name,serverData);
+            fileProgress.setStatus('completed');
+            QueueProgress.setProgress(successNum);
+            uploader.trigger('queueUploadComplete',{a:3})
+            if(successNum === total){
+                //QueueProgress.hide();
+            }
+
+        });
+
+        return uploader;
+    }
+        
+
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">	
+	<title>underscore</title>
+	<script type="text/javascript" src="underscore-1.4.4.min.js"></script>
+</head>
+<body>
+<h1>underscore</h1>
+<script type="text/template" id="tt">
+<%
+	var text = data.text,left = '1',right = '',isBreak = text.indexOf('_page_break_tag_')>-1?true:false,cls='';
+	if(isBreak){
+		left = text.split('_page_break_tag_')[0];
+		right = text.split('_page_break_tag_')[1];
+		cls = 'bbb';
+	}
+%>
+<div class="aaa <%= cls %>">
+    <div class="letter-content"><%= left %></div> <%= right %>
+</div>
+</script>
+<script type="text/javascript">
+var view= document.getElementById('tt').innerHTML;
+ alert( _.template(view, {text:"123 _page_break1_tag_ 456 sa"}, {variable:'data'}) );
+</script>
+</body>
+</html>
